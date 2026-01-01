@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpriteHealth - Upload Users</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 SpriteHealth User Management</h1>
+            <p class="subtitle">Upload Excel File to Import Users</p>
+        </header>
+
+        <div id="message" class="message"></div>
+        <div id="spinner" class="spinner"></div>
+
+        <div class="upload-section">
+            <div id="uploadArea" class="upload-area">
+                <div class="upload-icon">📁</div>
+                <h3>Drop Excel file here or click to browse</h3>
+                <p>Supported format: .xlsx (Excel 2007+)</p>
+                <p>Expected columns: Name, DOB, Email, Password, Phone, Gender, Address</p>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+            </div>
+        </div>
+
+        <div id="previewSection" style="display: none;">
+            <h3>Upload Preview</h3>
+            <p id="fileName"></p>
+            <button id="uploadBtn" class="btn btn-success">Upload to Datastore</button>
+            <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
+        </div>
+
+        <div id="resultSection" style="display: none; margin-top: 30px;">
+            <h3>Upload Results</h3>
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="uploadCount">0</div>
+                    <div class="stat-label">Users Uploaded</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="login.html" class="btn">Go to Login</a>
+                <a href="users.html" class="btn btn-secondary">View Users</a>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <p><a href="login.html" style="color: #667eea;">Already have an account? Login here</a></p>
+        </div>
+    </div>
+
+    <script type="module" src="js/upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# App Engine
+*.pyc
+*.pyo
+lib/
+
+# Sample data
+sample_users.xlsx
+*.xlsx
+*.xls
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Node modules (if any)
+node_modules/
+
+# Build outputs
+dist/
+build/

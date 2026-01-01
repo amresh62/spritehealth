@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Migration - SpriteHealth</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="nav-bar">
+            <div class="nav-links">
+                <a href="users.html">User Directory</a>
+                <a href="migration.html">Migration</a>
+            </div>
+            <div class="user-info">
+                <span id="userEmail">Loading...</span>
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </div>
+
+        <header>
+            <h1>☁️ BigQuery Migration</h1>
+            <p class="subtitle">Migrate User Data from Datastore to BigQuery</p>
+        </header>
+
+        <div id="message" class="message"></div>
+        <div id="spinner" class="spinner"></div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="datastoreCount">0</div>
+                <div class="stat-label">Users in Datastore</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="migratedCount">0</div>
+                <div class="stat-label">Successfully Migrated</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button id="migrateBtn" class="btn btn-success" style="padding: 15px 40px; font-size: 16px;">
+                🚀 Start Migration to BigQuery
+            </button>
+        </div>
+
+        <div id="migrationPreview" style="margin-top: 30px;">
+            <h3>Migration Preview</h3>
+            <p>The following users will be migrated to BigQuery:</p>
+            
+            <div id="previewTableContainer" style="max-height: 400px; overflow-y: auto;">
+                <table id="previewTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        <!-- Preview will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="migrationResults" style="display: none; margin-top: 30px;">
+            <h3>Migration Complete ✅</h3>
+            <div class="message success show" id="successMessage">
+                Migration completed successfully!
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="users.html" class="btn">Back to User Directory</a>
+            </div>
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📭</div>
+            <div class="empty-state-text">No users to migrate</div>
+            <p>Upload users first before migrating to BigQuery</p>
+            <a href="index.html" class="btn">Upload Users</a>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; background: #f8f9ff; border-radius: 8px;">
+            <h4>Migration Information</h4>
+            <ul style="list-style-position: inside; color: #666;">
+                <li>Migration transfers all user data from Google Cloud Datastore to BigQuery</li>
+                <li>Data integrity is maintained throughout the process</li>
+                <li>BigQuery table schema matches Datastore entity structure</li>
+                <li>All user attributes (Name, DOB, Email, Phone, Gender, Address) are preserved</li>
+                <li>This operation can be performed multiple times</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module" src="js/migration.js"></script>
+</body>
+</html>
