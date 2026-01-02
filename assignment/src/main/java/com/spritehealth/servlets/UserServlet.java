@@ -4,14 +4,15 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.spritehealth.models.User;
 import com.spritehealth.services.interfaces.IUserDatastoreService;
-import com.spritehealth.services.impl.InMemoryDatastoreServiceImpl;
+import com.spritehealth.services.impl.CloudDatastoreServiceImpl;
 import com.spritehealth.utils.GsonProvider;
+import com.spritehealth.utils.SessionManager;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -21,7 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 public class UserServlet extends HttpServlet {
-    private final IUserDatastoreService datastoreService = new InMemoryDatastoreServiceImpl();
+    private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
+    private final SessionManager sessionManager = new SessionManager();
     private final Gson gson = GsonProvider.getGson();
 
     @Override
@@ -209,8 +211,16 @@ public class UserServlet extends HttpServlet {
     }
 
     private boolean isAuthenticated(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        return session != null && session.getAttribute("userId") != null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("USER_SESSION_ID".equals(cookie.getName())) {
+                    Map<String, Object> sessionData = sessionManager.getSession(cookie.getValue());
+                    return sessionData != null;
+                }
+            }
+        }
+        return false;
     }
 
     private Map<String, Object> sanitizeUser(User user) {

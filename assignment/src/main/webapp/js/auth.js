@@ -70,12 +70,22 @@ export async function logout() {
 
 // Check if user is authenticated (for protected pages)
 export async function requireAuth() {
-    const result = await API.get('/api/login');
-    
-    if (!result.success || !result.data.authenticated) {
+    try {
+        const result = await API.get('/api/login');
+        
+        console.log('Auth check result:', result);
+        
+        if (!result.success || !result.data || !result.data.authenticated) {
+            console.log('Not authenticated, redirecting to login');
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        console.log('Authenticated successfully');
+        return true;
+    } catch (error) {
+        console.error('Auth check error:', error);
         window.location.href = 'login.html';
         return false;
     }
-    
-    return true;
 }
