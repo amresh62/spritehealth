@@ -66,6 +66,16 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
+    <!-- Session configuration -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+        <cookie-config>
+            <path>/</path>
+            <http-only>false</http-only>
+            <secure>false</secure>
+        </cookie-config>
+    </session-config>
+
     <!-- Security constraint for authenticated pages -->
     <security-constraint>
         <web-resource-collection>

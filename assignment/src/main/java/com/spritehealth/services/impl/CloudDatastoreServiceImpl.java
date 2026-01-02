@@ -17,24 +17,22 @@ public class CloudDatastoreServiceImpl implements IUserDatastoreService {
     private final Datastore datastore;
 
     public CloudDatastoreServiceImpl() {
-        // Configure for local development with Datastore Emulator
+        // Get project ID from environment
         String projectId = System.getenv("GOOGLE_CLOUD_PROJECT");
-        if (projectId == null || projectId.equals("your-project-id")) {
-            projectId = "local-dev-project";
+        if (projectId == null || projectId.isEmpty()) {
+            projectId = "api-7355075667102536099-806743"; // Fallback to actual project ID
         }
         
-        // Check if running in local development mode
-        String emulatorHost = System.getenv("DATASTORE_EMULATOR_HOST");
         DatastoreOptions.Builder builder = DatastoreOptions.newBuilder().setProjectId(projectId);
         
-        if (emulatorHost != null) {
-            // Using environment variable for emulator
+        // Only use emulator if explicitly configured via environment variable
+        String emulatorHost = System.getenv("DATASTORE_EMULATOR_HOST");
+        if (emulatorHost != null && !emulatorHost.isEmpty()) {
             builder.setHost(emulatorHost);
-            System.out.println("Connected to Datastore Emulator at: " + emulatorHost);
+            System.out.println("Using Datastore Emulator at: " + emulatorHost);
         } else {
-            // Try to use local emulator on default port
-            builder.setHost("localhost:8081");
-            System.out.println("Attempting connection to Datastore Emulator at: localhost:8081");
+            // Production mode - use Cloud Datastore
+            System.out.println("Using Cloud Datastore for project: " + projectId);
         }
         
         this.datastore = builder.build().getService();

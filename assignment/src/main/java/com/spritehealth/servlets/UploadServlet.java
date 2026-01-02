@@ -3,7 +3,7 @@ package com.spritehealth.servlets;
 import com.google.gson.Gson;
 import com.spritehealth.models.User;
 import com.spritehealth.services.interfaces.IUserDatastoreService;
-import com.spritehealth.services.impl.InMemoryDatastoreServiceImpl;
+import com.spritehealth.services.impl.CloudDatastoreServiceImpl;
 import com.spritehealth.utils.GsonProvider;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -30,7 +30,7 @@ import java.util.Map;
 public class UploadServlet extends HttpServlet {
     // Use in-memory storage for local testing - change to CloudDatastoreServiceImpl
     // for production
-    private final IUserDatastoreService datastoreService = new InMemoryDatastoreServiceImpl();
+    private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
     private final Gson gson = GsonProvider.getGson();
 
     @Override

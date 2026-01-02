@@ -4,21 +4,23 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.spritehealth.models.User;
 import com.spritehealth.services.interfaces.IUserDatastoreService;
-import com.spritehealth.services.impl.InMemoryDatastoreServiceImpl;
+import com.spritehealth.services.impl.CloudDatastoreServiceImpl;
 import com.spritehealth.utils.GsonProvider;
+import com.spritehealth.utils.SessionManager;
 
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginServlet extends HttpServlet {
-    private final IUserDatastoreService datastoreService = new InMemoryDatastoreServiceImpl();
+    private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
+    private final SessionManager sessionManager = new SessionManager();
     private final Gson gson = GsonProvider.getGson();
 
     @Override
@@ -27,6 +29,7 @@ public class LoginServlet extends HttpServlet {
         
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         
         Map<String, Object> result = new HashMap<>();
         
@@ -42,12 +45,18 @@ public class LoginServlet extends HttpServlet {
             User user = datastoreService.authenticateUser(email, password);
             
             if (user != null) {
-                // Create session
-                HttpSession session = request.getSession(true);
-                session.setAttribute("userId", user.getId());
-                session.setAttribute("userEmail", user.getEmail());
-                session.setAttribute("userName", user.getName());
-                session.setMaxInactiveInterval(30 * 60); // 30 minutes
+                // Create session in Datastore
+                String sessionId = sessionManager.createSession(user.getId(), user.getEmail(), user.getName());
+                
+                // Set cookie
+                Cookie sessionCookie = new Cookie("USER_SESSION_ID", sessionId);
+                sessionCookie.setPath("/");
+                sessionCookie.setMaxAge(30 * 60); // 30 minutes
+                sessionCookie.setHttpOnly(false);
+                response.addCookie(sessionCookie);
+                
+                System.out.println("Login successful - Session created: " + sessionId);
+                System.out.println("Login successful - User ID: " + user.getId());
                 
                 // Prepare user data without password
                 Map<String, Object> userData = new HashMap<>();
@@ -88,21 +97,37 @@ public class LoginServlet extends HttpServlet {
         
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         
         Map<String, Object> result = new HashMap<>();
         
-        HttpSession session = request.getSession(false);
+        // Get session ID from cookie
+        String sessionId = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("USER_SESSION_ID".equals(cookie.getName())) {
+                    sessionId = cookie.getValue();
+                    break;
+                }
+            }
+        }
         
-        if (session != null && session.getAttribute("userId") != null) {
-            Map<String, Object> userData = new HashMap<>();
-            userData.put("id", session.getAttribute("userId"));
-            userData.put("email", session.getAttribute("userEmail"));
-            userData.put("name", session.getAttribute("userName"));
-            
-            result.put("authenticated", true);
-            result.put("user", userData);
+        System.out.println("Auth check - Session ID from cookie: " + sessionId);
+        
+        if (sessionId != null) {
+            Map<String, Object> sessionData = sessionManager.getSession(sessionId);
+            if (sessionData != null) {
+                result.put("authenticated", true);
+                result.put("user", sessionData);
+                System.out.println("Auth check - User authenticated: " + sessionData.get("userEmail"));
+            } else {
+                result.put("authenticated", false);
+                System.out.println("Auth check - Session expired or invalid");
+            }
         } else {
             result.put("authenticated", false);
+            System.out.println("Auth check - No session cookie found");
         }
         
         response.getWriter().write(gson.toJson(result));

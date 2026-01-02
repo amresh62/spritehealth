@@ -3,6 +3,7 @@
     <runtime>java17</runtime>
     <threadsafe>true</threadsafe>
     <sessions-enabled>true</sessions-enabled>
+    <async-session-persistence enabled="true" />
     
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
@@ -10,7 +11,7 @@
     
     <!-- Environment variables for GCP services -->
     <env-variables>
-        <env-var name="GOOGLE_CLOUD_PROJECT" value="your-project-id" />
+        <env-var name="GOOGLE_CLOUD_PROJECT" value="api-7355075667102536099-806743" />
         <env-var name="BIGQUERY_DATASET" value="user_data" />
         <env-var name="BIGQUERY_TABLE" value="User" />
     </env-variables>

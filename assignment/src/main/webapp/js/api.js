@@ -4,6 +4,7 @@ const API = {
         try {
             const response = await fetch(url, {
                 ...options,
+                credentials: 'same-origin',  // Include cookies in requests
                 headers: {
                     'Content-Type': 'application/json',
                     ...options.headers
