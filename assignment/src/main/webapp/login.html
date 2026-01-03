@@ -4,37 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - SpriteHealth</title>
+    <!-- Link to external CSS stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container login-container">
+        <!-- Page Header -->
         <header>
             <h1>🏥 SpriteHealth</h1>
             <p class="subtitle">User Management System</p>
         </header>
 
+        <!-- Message area for displaying login errors or info -->
         <div id="message" class="message"></div>
+        <!-- Spinner for loading state -->
         <div id="spinner" class="spinner"></div>
 
+        <!-- Login Form -->
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email</label>
+                <!-- Email input field -->
                 <input type="email" id="email" name="email" required placeholder="Enter your email">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
+                <!-- Password input field -->
                 <input type="password" id="password" name="password" required placeholder="Enter your password">
             </div>
 
+            <!-- Submit button for login -->
             <button type="submit" class="btn" style="width: 100%;">Login</button>
         </form>
 
+        <!-- Footer with link to user upload page -->
         <div class="login-footer">
             <p>Don't have an account? <a href="index.html" style="color: #667eea;">Upload users first</a></p>
         </div>
     </div>
 
+    <!-- Import authentication logic (JavaScript module) -->
     <script type="module" src="js/auth.js"></script>
 </body>
 </html>

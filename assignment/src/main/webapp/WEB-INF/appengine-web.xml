@@ -1,18 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    appengine-web.xml: Configuration file for Google App Engine deployment.
+    Defines runtime, threading, session, system properties, and environment variables.
+-->
 <appengine-web-app xmlns="http://appengine.google.com/ns/1.0">
+    <!-- Specify the Java runtime environment version -->
     <runtime>java17</runtime>
+    
+    <!-- Enable thread-safe request handling -->
     <threadsafe>true</threadsafe>
+    
+    <!-- Enable HTTP session support -->
     <sessions-enabled>true</sessions-enabled>
+    
+    <!-- Enable asynchronous session persistence -->
     <async-session-persistence enabled="true" />
     
+    <!-- Define system properties for the application -->
     <system-properties>
+        <!-- Specify the logging configuration file location -->
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     </system-properties>
     
-    <!-- Environment variables for GCP services -->
+    <!-- Define environment variables for GCP services -->
     <env-variables>
+        <!-- Google Cloud project ID -->
         <env-var name="GOOGLE_CLOUD_PROJECT" value="api-7355075667102536099-806743" />
+        <!-- BigQuery dataset name -->
         <env-var name="BIGQUERY_DATASET" value="user_data" />
+        <!-- BigQuery table name -->
         <env-var name="BIGQUERY_TABLE" value="User" />
     </env-variables>
 </appengine-web-app>

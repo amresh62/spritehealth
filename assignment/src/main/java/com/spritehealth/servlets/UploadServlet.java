@@ -24,200 +24,231 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servlet for handling Excel file uploads and importing user data.
+ */
 @MultipartConfig(maxFileSize = 10 * 1024 * 1024, // 10MB
-        maxRequestSize = 20 * 1024 * 1024 // 20MB
+    maxRequestSize = 20 * 1024 * 1024 // 20MB
 )
 public class UploadServlet extends HttpServlet {
-    // Use in-memory storage for local testing - change to CloudDatastoreServiceImpl
-    // for production
+    // Service for user data storage (uses CloudDatastoreServiceImpl)
     private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
+    // Gson instance for JSON serialization
     private final Gson gson = GsonProvider.getGson();
 
+    /**
+     * Handles POST requests for file upload.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
+    response.setContentType("application/json");
+    response.setCharacterEncoding("UTF-8");
 
-        Map<String, Object> result = new HashMap<>();
+    Map<String, Object> result = new HashMap<>();
+
+    try {
+        // Get the uploaded file part from the request
+        Part filePart = request.getPart("file");
+
+        if (filePart == null) {
+        // No file uploaded
+        result.put("success", false);
+        result.put("message", "No file uploaded");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.getWriter().write(gson.toJson(result));
+        return;
+        }
+
+        // Parse the uploaded Excel file into a list of users
+        List<User> users = parseExcelFile(filePart.getInputStream());
+
+        if (users.isEmpty()) {
+        // No valid users found in the file
+        result.put("success", false);
+        result.put("message", "No valid users found in the Excel file");
+        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        response.getWriter().write(gson.toJson(result));
+        return;
+        }
+
+        // Save users to the datastore
+        List<User> savedUsers = datastoreService.createUsers(users);
+
+        // Prepare success response
+        result.put("success", true);
+        result.put("message", "Successfully uploaded " + savedUsers.size() + " users");
+        result.put("count", savedUsers.size());
+        result.put("users", savedUsers);
+
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().write(gson.toJson(result));
+
+    } catch (Exception e) {
+        // Handle errors and send error response
+        e.printStackTrace();
+        result.put("success", false);
+        result.put("message", "Error uploading file: " + e.getMessage());
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        response.getWriter().write(gson.toJson(result));
+    }
+    }
+
+    /**
+     * Parses the Excel file input stream and extracts user data.
+     * @param inputStream Input stream of the uploaded Excel file
+     * @return List of User objects parsed from the file
+     * @throws IOException if file reading fails
+     */
+    private List<User> parseExcelFile(InputStream inputStream) throws IOException {
+    List<User> users = new ArrayList<>();
+
+    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+        Sheet sheet = workbook.getSheetAt(0);
+
+        // Skip header row
+        boolean isFirstRow = true;
+
+        for (Row row : sheet) {
+        if (isFirstRow) {
+            isFirstRow = false;
+            continue;
+        }
+
+        // Skip empty rows
+        if (isRowEmpty(row)) {
+            continue;
+        }
 
         try {
-            // Get the uploaded file
-            Part filePart = request.getPart("file");
+            User user = new User();
 
-            if (filePart == null) {
-                result.put("success", false);
-                result.put("message", "No file uploaded");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(result));
-                return;
+            // Column 0: Name
+            Cell nameCell = row.getCell(0);
+            if (nameCell != null) {
+            user.setName(getCellValueAsString(nameCell));
             }
 
-            // Parse Excel file
-            List<User> users = parseExcelFile(filePart.getInputStream());
-
-            if (users.isEmpty()) {
-                result.put("success", false);
-                result.put("message", "No valid users found in the Excel file");
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                response.getWriter().write(gson.toJson(result));
-                return;
+            // Column 1: DOB
+            Cell dobCell = row.getCell(1);
+            if (dobCell != null) {
+            LocalDate dob = getCellValueAsDate(dobCell);
+            user.setDateOfBirth(dob);
             }
 
-            // Save users to Datastore
-            List<User> savedUsers = datastoreService.createUsers(users);
+            // Column 2: Email
+            Cell emailCell = row.getCell(2);
+            if (emailCell != null) {
+            user.setEmail(getCellValueAsString(emailCell));
+            }
 
-            result.put("success", true);
-            result.put("message", "Successfully uploaded " + savedUsers.size() + " users");
-            result.put("count", savedUsers.size());
-            result.put("users", savedUsers);
+            // Column 3: Password
+            Cell passwordCell = row.getCell(3);
+            if (passwordCell != null) {
+            user.setPassword(getCellValueAsString(passwordCell));
+            }
 
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(gson.toJson(result));
+            // Column 4: Phone
+            Cell phoneCell = row.getCell(4);
+            if (phoneCell != null) {
+            user.setPhone(getCellValueAsString(phoneCell));
+            }
+
+            // Column 5: Gender
+            Cell genderCell = row.getCell(5);
+            if (genderCell != null) {
+            user.setGender(getCellValueAsString(genderCell));
+            }
+
+            // Column 6: Address
+            Cell addressCell = row.getCell(6);
+            if (addressCell != null) {
+            user.setAddress(getCellValueAsString(addressCell));
+            }
+
+            users.add(user);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            result.put("success", false);
-            result.put("message", "Error uploading file: " + e.getMessage());
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson(result));
+            // Skip invalid rows and print error
+            System.err.println("Error parsing row: " + e.getMessage());
+        }
         }
     }
 
-    private List<User> parseExcelFile(InputStream inputStream) throws IOException {
-        List<User> users = new ArrayList<>();
-
-        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-            Sheet sheet = workbook.getSheetAt(0);
-
-            // Skip header row
-            boolean isFirstRow = true;
-
-            for (Row row : sheet) {
-                if (isFirstRow) {
-                    isFirstRow = false;
-                    continue;
-                }
-
-                // Skip empty rows
-                if (isRowEmpty(row)) {
-                    continue;
-                }
-
-                try {
-                    User user = new User();
-
-                    // Column 0: Name
-                    Cell nameCell = row.getCell(0);
-                    if (nameCell != null) {
-                        user.setName(getCellValueAsString(nameCell));
-                    }
-
-                    // Column 1: DOB
-                    Cell dobCell = row.getCell(1);
-                    if (dobCell != null) {
-                        LocalDate dob = getCellValueAsDate(dobCell);
-                        user.setDateOfBirth(dob);
-                    }
-
-                    // Column 2: Email
-                    Cell emailCell = row.getCell(2);
-                    if (emailCell != null) {
-                        user.setEmail(getCellValueAsString(emailCell));
-                    }
-
-                    // Column 3: Password
-                    Cell passwordCell = row.getCell(3);
-                    if (passwordCell != null) {
-                        user.setPassword(getCellValueAsString(passwordCell));
-                    }
-
-                    // Column 4: Phone
-                    Cell phoneCell = row.getCell(4);
-                    if (phoneCell != null) {
-                        user.setPhone(getCellValueAsString(phoneCell));
-                    }
-
-                    // Column 5: Gender
-                    Cell genderCell = row.getCell(5);
-                    if (genderCell != null) {
-                        user.setGender(getCellValueAsString(genderCell));
-                    }
-
-                    // Column 6: Address
-                    Cell addressCell = row.getCell(6);
-                    if (addressCell != null) {
-                        user.setAddress(getCellValueAsString(addressCell));
-                    }
-
-                    users.add(user);
-
-                } catch (Exception e) {
-                    // Skip invalid rows
-                    System.err.println("Error parsing row: " + e.getMessage());
-                }
-            }
-        }
-
-        return users;
+    return users;
     }
 
+    /**
+     * Converts a cell value to String.
+     * @param cell Excel cell
+     * @return String representation of the cell value
+     */
     private String getCellValueAsString(Cell cell) {
-        if (cell == null) {
-            return "";
-        }
-
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue().trim();
-            case NUMERIC:
-                if (DateUtil.isCellDateFormatted(cell)) {
-                    Date date = cell.getDateCellValue();
-                    return date.toString();
-                } else {
-                    return String.valueOf((long) cell.getNumericCellValue());
-                }
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            case FORMULA:
-                return cell.getCellFormula();
-            default:
-                return "";
-        }
+    if (cell == null) {
+        return "";
     }
 
-    private LocalDate getCellValueAsDate(Cell cell) {
-        if (cell == null) {
-            return null;
-        }
-
-        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+    switch (cell.getCellType()) {
+        case STRING:
+        return cell.getStringCellValue().trim();
+        case NUMERIC:
+        if (DateUtil.isCellDateFormatted(cell)) {
             Date date = cell.getDateCellValue();
-            return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        } else if (cell.getCellType() == CellType.STRING) {
-            try {
-                return LocalDate.parse(cell.getStringCellValue().trim());
-            } catch (Exception e) {
-                return null;
-            }
+            return date.toString();
+        } else {
+            return String.valueOf((long) cell.getNumericCellValue());
         }
+        case BOOLEAN:
+        return String.valueOf(cell.getBooleanCellValue());
+        case FORMULA:
+        return cell.getCellFormula();
+        default:
+        return "";
+    }
+    }
 
+    /**
+     * Converts a cell value to LocalDate if possible.
+     * @param cell Excel cell
+     * @return LocalDate value or null if not parsable
+     */
+    private LocalDate getCellValueAsDate(Cell cell) {
+    if (cell == null) {
         return null;
     }
 
+    if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+        Date date = cell.getDateCellValue();
+        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    } else if (cell.getCellType() == CellType.STRING) {
+        try {
+        return LocalDate.parse(cell.getStringCellValue().trim());
+        } catch (Exception e) {
+        return null;
+        }
+    }
+
+    return null;
+    }
+
+    /**
+     * Checks if a row is empty (all cells are blank).
+     * @param row Excel row
+     * @return true if row is empty, false otherwise
+     */
     private boolean isRowEmpty(Row row) {
-        if (row == null) {
-            return true;
-        }
-
-        for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {
-            Cell cell = row.getCell(cellNum);
-            if (cell != null && cell.getCellType() != CellType.BLANK) {
-                return false;
-            }
-        }
-
+    if (row == null) {
         return true;
+    }
+
+    for (int cellNum = row.getFirstCellNum(); cellNum < row.getLastCellNum(); cellNum++) {
+        Cell cell = row.getCell(cellNum);
+        if (cell != null && cell.getCellType() != CellType.BLANK) {
+        return false;
+        }
+    }
+
+    return true;
     }
 }

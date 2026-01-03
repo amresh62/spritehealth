@@ -4,28 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpriteHealth - Upload Users</title>
+    <!-- Link to external stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
+        <!-- Header Section -->
         <header>
             <h1>🏥 SpriteHealth User Management</h1>
             <p class="subtitle">Upload Excel File to Import Users</p>
         </header>
 
+        <!-- Message display area for errors/success -->
         <div id="message" class="message"></div>
+        <!-- Spinner for loading state -->
         <div id="spinner" class="spinner"></div>
 
+        <!-- File Upload Section -->
         <div class="upload-section">
             <div id="uploadArea" class="upload-area">
                 <div class="upload-icon">📁</div>
                 <h3>Drop Excel file here or click to browse</h3>
                 <p>Supported format: .xlsx (Excel 2007+)</p>
                 <p>Expected columns: Name, DOB, Email, Password, Phone, Gender, Address</p>
+                <!-- Hidden file input for Excel files -->
                 <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
             </div>
         </div>
 
+        <!-- Preview Section: Shown after file is selected -->
         <div id="previewSection" style="display: none;">
             <h3>Upload Preview</h3>
             <p id="fileName"></p>
@@ -33,6 +40,7 @@
             <button id="cancelBtn" class="btn btn-secondary">Cancel</button>
         </div>
 
+        <!-- Result Section: Shown after upload is complete -->
         <div id="resultSection" style="display: none; margin-top: 30px;">
             <h3>Upload Results</h3>
             <div class="stats">
@@ -42,16 +50,19 @@
                 </div>
             </div>
             <div style="text-align: center; margin-top: 20px;">
+                <!-- Navigation buttons after upload -->
                 <a href="login.html" class="btn">Go to Login</a>
                 <a href="users.html" class="btn btn-secondary">View Users</a>
             </div>
         </div>
 
+        <!-- Link to login page for existing users -->
         <div style="margin-top: 30px; text-align: center;">
             <p><a href="login.html" style="color: #667eea;">Already have an account? Login here</a></p>
         </div>
     </div>
 
+    <!-- Main JavaScript module for upload functionality -->
     <script type="module" src="js/upload.js"></script>
 </body>
 </html>

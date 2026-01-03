@@ -21,11 +21,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servlet for handling user-related operations such as retrieving, creating, and deleting users.
+ */
 public class UserServlet extends HttpServlet {
+    // Service for interacting with the user datastore
     private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
+    // Session manager for handling user sessions
     private final SessionManager sessionManager = new SessionManager();
+    // Gson instance for JSON serialization/deserialization
     private final Gson gson = GsonProvider.getGson();
 
+    /**
+     * Handles GET requests for retrieving users.
+     * If a user ID is provided in the path, retrieves a specific user.
+     * Otherwise, retrieves all users.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -92,6 +103,10 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles POST requests for creating a new user.
+     * Expects a JSON body with user details.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -111,10 +126,11 @@ public class UserServlet extends HttpServlet {
                 return;
             }
             
-            // Read JSON body
+            // Read JSON body from request
             BufferedReader reader = request.getReader();
             JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
             
+            // Create a new User object from the JSON data
             User user = new User();
             user.setName(jsonObject.get("name").getAsString());
             user.setEmail(jsonObject.get("email").getAsString());
@@ -133,6 +149,7 @@ public class UserServlet extends HttpServlet {
                 user.setDateOfBirth(LocalDate.parse(jsonObject.get("dateOfBirth").getAsString()));
             }
             
+            // Save the new user to the datastore
             User savedUser = datastoreService.createUser(user);
             
             result.put("success", true);
@@ -151,6 +168,10 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting a user by ID.
+     * Expects the user ID in the path.
+     */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -180,9 +201,11 @@ public class UserServlet extends HttpServlet {
                 return;
             }
             
+            // Extract user ID from path
             String userId = pathInfo.substring(1);
             try {
                 Long id = Long.parseLong(userId);
+                // Attempt to delete the user
                 boolean deleted = datastoreService.deleteUser(String.valueOf(id));
                 
                 if (deleted) {
@@ -210,6 +233,11 @@ public class UserServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Checks if the request is authenticated by verifying the session cookie.
+     * @param request The HTTP request
+     * @return true if authenticated, false otherwise
+     */
     private boolean isAuthenticated(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -223,6 +251,11 @@ public class UserServlet extends HttpServlet {
         return false;
     }
 
+    /**
+     * Removes sensitive information from the user object before sending it in the response.
+     * @param user The user object
+     * @return A map containing sanitized user data
+     */
     private Map<String, Object> sanitizeUser(User user) {
         Map<String, Object> sanitized = new HashMap<>();
         sanitized.put("id", user.getId());

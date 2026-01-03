@@ -19,12 +19,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Servlet for handling migration of users from Datastore to BigQuery.
+ * Provides endpoints for previewing and executing the migration.
+ */
 public class MigrationServlet extends HttpServlet {
+    // Service for interacting with Datastore
     private final IUserDatastoreService datastoreService = new CloudDatastoreServiceImpl();
+    // Service for interacting with BigQuery
     private final IBigQueryService bigQueryService = new BigQueryServiceImpl();
+    // Session manager for authentication
     private final SessionManager sessionManager = new SessionManager();
+    // Gson instance for JSON serialization
     private final Gson gson = GsonProvider.getGson();
 
+    /**
+     * Handles GET requests to preview migration data.
+     * Returns all users from Datastore and BigQuery table status.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -50,6 +62,7 @@ public class MigrationServlet extends HttpServlet {
             result.put("success", true);
             result.put("users", users);
             result.put("count", users.size());
+            // Check if the BigQuery table exists
             result.put("bigQueryTableExists", bigQueryService.tableExists());
             
             response.getWriter().write(gson.toJson(result));
@@ -63,6 +76,10 @@ public class MigrationServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles POST requests to execute the migration.
+     * Migrates all users from Datastore to BigQuery.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -85,6 +102,7 @@ public class MigrationServlet extends HttpServlet {
             // Get all users from Datastore
             List<User> users = datastoreService.getAllUsers();
             
+            // If no users found, return error
             if (users.isEmpty()) {
                 result.put("success", false);
                 result.put("message", "No users found in Datastore to migrate");
@@ -93,7 +111,7 @@ public class MigrationServlet extends HttpServlet {
                 return;
             }
             
-            // Migrate to BigQuery
+            // Migrate users to BigQuery and get migration result
             Map<String, Object> migrationResult = bigQueryService.migrateUsers(users);
             
             response.setStatus(HttpServletResponse.SC_OK);
@@ -108,11 +126,17 @@ public class MigrationServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Checks if the user is authenticated by verifying the session cookie.
+     * @param request HttpServletRequest object
+     * @return true if authenticated, false otherwise
+     */
     private boolean isAuthenticated(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("USER_SESSION_ID".equals(cookie.getName())) {
+                    // Retrieve session data using the session manager
                     Map<String, Object> sessionData = sessionManager.getSession(cookie.getValue());
                     return sessionData != null;
                 }

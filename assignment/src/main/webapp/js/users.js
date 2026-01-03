@@ -1,28 +1,32 @@
 // User management functionality
+
+// Import required modules
 import API from './api.js';
 import UI from './ui.js';
 import { logout, requireAuth } from './auth.js';
 
+// Arrays to hold all users and filtered users
 let allUsers = [];
 let filteredUsers = [];
 
+// Main entry point: runs when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check authentication
+    // Check if user is authenticated
     const isAuth = await requireAuth();
     if (!isAuth) return;
 
-    // Initialize UI
+    // Initialize UI elements (e.g., user email in nav)
     initializeUI();
     
-    // Load users
+    // Load users from API
     await loadUsers();
 
-    // Set up event listeners
+    // Set up event listeners for UI controls
     setupEventListeners();
 });
 
+// Display logged-in user's email in the navigation bar
 function initializeUI() {
-    // Display user email in nav
     const user = JSON.parse(sessionStorage.getItem('user') || '{}');
     const userEmailEl = document.getElementById('userEmail');
     if (userEmailEl && user.email) {
@@ -30,6 +34,7 @@ function initializeUI() {
     }
 }
 
+// Attach event listeners to buttons and inputs
 function setupEventListeners() {
     // Logout button
     const logoutBtn = document.getElementById('logoutBtn');
@@ -37,25 +42,26 @@ function setupEventListeners() {
         logoutBtn.addEventListener('click', logout);
     }
 
-    // Search functionality
+    // Search input for filtering users
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', handleSearch);
     }
 
-    // Filter functionality
+    // Gender filter dropdown
     const genderFilter = document.getElementById('genderFilter');
     if (genderFilter) {
         genderFilter.addEventListener('change', handleFilter);
     }
 
-    // Refresh button
+    // Refresh button to reload users
     const refreshBtn = document.getElementById('refreshBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', loadUsers);
     }
 }
 
+// Fetch users from API and update UI
 async function loadUsers() {
     UI.showSpinner('spinner');
 
@@ -64,12 +70,14 @@ async function loadUsers() {
     UI.hideSpinner('spinner');
 
     if (result.success && result.data.success) {
+        // Store users and initialize filtered list
         allUsers = result.data.users || [];
         filteredUsers = [...allUsers];
         
         updateStats();
         renderUsers();
         
+        // Show or hide empty state based on user count
         if (allUsers.length === 0) {
             showEmptyState();
         } else {
@@ -81,17 +89,20 @@ async function loadUsers() {
     }
 }
 
+// Render the user table based on filteredUsers array
 function renderUsers() {
     const tbody = document.getElementById('userTableBody');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
+    // Show message if no users match the filter/search
     if (filteredUsers.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No users match your search</td></tr>';
         return;
     }
 
+    // Create a table row for each user
     filteredUsers.forEach(user => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -110,6 +121,7 @@ function renderUsers() {
     });
 }
 
+// Handle search input: filter users by name, email, phone, or address
 function handleSearch(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
 
@@ -126,19 +138,21 @@ function handleSearch(e) {
         });
     }
 
-    // Apply current filter
+    // Apply gender filter after search
     applyGenderFilter();
     
     updateStats();
     renderUsers();
 }
 
+// Handle gender filter dropdown change
 function handleFilter() {
     applyGenderFilter();
     updateStats();
     renderUsers();
 }
 
+// Filter users by selected gender
 function applyGenderFilter() {
     const genderFilter = document.getElementById('genderFilter');
     const selectedGender = genderFilter ? genderFilter.value : '';
@@ -148,6 +162,7 @@ function applyGenderFilter() {
     }
 }
 
+// Update statistics (total and filtered user counts)
 function updateStats() {
     const totalUsersEl = document.getElementById('totalUsers');
     const filteredUsersEl = document.getElementById('filteredUsers');
@@ -161,6 +176,7 @@ function updateStats() {
     }
 }
 
+// Show empty state message and hide user table
 function showEmptyState() {
     const emptyState = document.getElementById('emptyState');
     const tableContainer = document.getElementById('userTableContainer');
@@ -169,6 +185,7 @@ function showEmptyState() {
     if (tableContainer) tableContainer.style.display = 'none';
 }
 
+// Hide empty state message and show user table
 function hideEmptyState() {
     const emptyState = document.getElementById('emptyState');
     const tableContainer = document.getElementById('userTableContainer');
@@ -177,7 +194,7 @@ function hideEmptyState() {
     if (tableContainer) tableContainer.style.display = 'block';
 }
 
-// Delete user function (exposed globally)
+// Delete user function (exposed globally for use in HTML onclick)
 window.deleteUser = async function(userId) {
     if (!confirm('Are you sure you want to delete this user?')) {
         return;

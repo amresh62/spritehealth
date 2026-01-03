@@ -4,29 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BigQuery Migration - SpriteHealth</title>
+    <!-- Link to external stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
+        <!-- Navigation Bar -->
         <div class="nav-bar">
             <div class="nav-links">
                 <a href="users.html">User Directory</a>
                 <a href="migration.html">Migration</a>
             </div>
             <div class="user-info">
+                <!-- Display logged-in user's email -->
                 <span id="userEmail">Loading...</span>
+                <!-- Logout button -->
                 <button id="logoutBtn" class="btn btn-secondary">Logout</button>
             </div>
         </div>
 
+        <!-- Page Header -->
         <header>
             <h1>☁️ BigQuery Migration</h1>
             <p class="subtitle">Migrate User Data from Datastore to BigQuery</p>
         </header>
 
+        <!-- Message and Spinner for status updates -->
         <div id="message" class="message"></div>
         <div id="spinner" class="spinner"></div>
 
+        <!-- Migration Statistics -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-value" id="datastoreCount">0</div>
@@ -38,12 +45,14 @@
             </div>
         </div>
 
+        <!-- Migration Button -->
         <div style="text-align: center; margin: 30px 0;">
             <button id="migrateBtn" class="btn btn-success" style="padding: 15px 40px; font-size: 16px;">
                 🚀 Start Migration to BigQuery
             </button>
         </div>
 
+        <!-- Migration Preview Table -->
         <div id="migrationPreview" style="margin-top: 30px;">
             <h3>Migration Preview</h3>
             <p>The following users will be migrated to BigQuery:</p>
@@ -66,6 +75,7 @@
             </div>
         </div>
 
+        <!-- Migration Results Section (shown after migration completes) -->
         <div id="migrationResults" style="display: none; margin-top: 30px;">
             <h3>Migration Complete ✅</h3>
             <div class="message success show" id="successMessage">
@@ -76,6 +86,7 @@
             </div>
         </div>
 
+        <!-- Empty State (shown if there are no users to migrate) -->
         <div id="emptyState" class="empty-state" style="display: none;">
             <div class="empty-state-icon">📭</div>
             <div class="empty-state-text">No users to migrate</div>
@@ -83,6 +94,7 @@
             <a href="index.html" class="btn">Upload Users</a>
         </div>
 
+        <!-- Migration Information Section -->
         <div style="margin-top: 40px; padding: 20px; background: #f8f9ff; border-radius: 8px;">
             <h4>Migration Information</h4>
             <ul style="list-style-position: inside; color: #666;">
@@ -95,6 +107,7 @@
         </div>
     </div>
 
+    <!-- Main JavaScript module for migration functionality -->
     <script type="module" src="js/migration.js"></script>
 </body>
 </html>

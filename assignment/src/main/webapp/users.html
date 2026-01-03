@@ -4,29 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Directory - SpriteHealth</title>
+    <!-- Link to external stylesheet -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
+        <!-- Navigation Bar -->
         <div class="nav-bar">
             <div class="nav-links">
                 <a href="users.html">User Directory</a>
                 <a href="migration.html">Migration</a>
             </div>
             <div class="user-info">
+                <!-- Display logged-in user's email -->
                 <span id="userEmail">Loading...</span>
+                <!-- Logout button -->
                 <button id="logoutBtn" class="btn btn-secondary">Logout</button>
             </div>
         </div>
 
+        <!-- Page Header -->
         <header>
             <h1>👥 User Directory</h1>
             <p class="subtitle">Search, Filter, and Manage Users</p>
         </header>
 
+        <!-- Message and Loading Spinner -->
         <div id="message" class="message"></div>
         <div id="spinner" class="spinner"></div>
 
+        <!-- User Statistics -->
         <div class="stats">
             <div class="stat-card">
                 <div class="stat-value" id="totalUsers">0</div>
@@ -38,11 +45,14 @@
             </div>
         </div>
 
+        <!-- Search and Filter Controls -->
         <div class="controls">
             <div class="search-box">
+                <!-- Search input for users -->
                 <input type="text" id="searchInput" placeholder="🔍 Search by name, email, phone...">
             </div>
             <div class="filter-box">
+                <!-- Gender filter dropdown -->
                 <select id="genderFilter">
                     <option value="">All Genders</option>
                     <option value="Male">Male</option>
@@ -51,10 +61,12 @@
                 </select>
             </div>
             <div>
+                <!-- Refresh button to reload users -->
                 <button id="refreshBtn" class="btn">🔄 Refresh</button>
             </div>
         </div>
 
+        <!-- User Table -->
         <div id="userTableContainer">
             <table id="userTable">
                 <thead>
@@ -70,11 +82,12 @@
                     </tr>
                 </thead>
                 <tbody id="userTableBody">
-                    <!-- Users will be loaded here -->
+                    <!-- Users will be loaded here dynamically -->
                 </tbody>
             </table>
         </div>
 
+        <!-- Empty State (shown when no users are found) -->
         <div id="emptyState" class="empty-state" style="display: none;">
             <div class="empty-state-icon">📭</div>
             <div class="empty-state-text">No users found</div>
@@ -83,6 +96,7 @@
         </div>
     </div>
 
+    <!-- Main JavaScript module for user directory functionality -->
     <script type="module" src="js/users.js"></script>
 </body>
 </html>
